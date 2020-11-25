@@ -15,11 +15,11 @@
       </div> 
     <div class="login-seite">
       <div class="form">
-        <form class="login-form">
-          <input type="text" placeholder="Nutzername"/>
-          <input type="password" placeholder="Passwort"/>
-          <input type="password" placeholder="Passwort wiederholung"/>
-          <button>Registrieren</button>
+        <form class="login-form" action="/register" method="POST">
+          <input type="text" placeholder="Nutzername" name="username"/>
+          <input type="password" placeholder="Passwort" name="password"/>
+          <input type="password" placeholder="Passwort wiederholung" name="passwordRepeat"/>
+          <button type="submit">Registrieren</button>
           <p class="message">Bereits registriert? <a href="login">Einloggen</a></p>
         </form>
       </div>

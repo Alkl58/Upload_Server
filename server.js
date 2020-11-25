@@ -30,15 +30,15 @@ app.listen(80, function(){
 
 app.use(express.static(__dirname + '/public'));
 
-// ══════════════════════ GET ══════════════════════
+// ══════════════════ MainPage GET ═══════════════════
 app.get("/", function(req, res){
     res.sendFile(__dirname + "/views/index.html");
 });
-
+// ════════════════════ Login GET ════════════════════
 app.get("/login", function(req, res){
     res.render("login");
 });
-
+// ══════════════════ Register GET ═══════════════════
 app.get("/register", function(req, res){
     res.render("register");
 });
@@ -69,7 +69,6 @@ app.post("/login", function(req, res){
     });
 });
 
-
 // Prüft ob Nutzername und Passwort stimmen
 function anmeldungErfolgreich(benutzername, passwort, rows){
     for(var i = 0; i < rows.length; i++){
@@ -78,4 +77,51 @@ function anmeldungErfolgreich(benutzername, passwort, rows){
         }
     }
     return false;
+}
+
+
+// ════════════════ Registrieren POST ═════════════════
+app.post("/register", function(req,res){
+    const username = req.body.username;
+    const password = req.body.password;
+    const passrepeat = req.body.passwordRepeat;
+
+    if (username.length >= 4){
+        if (password.length >= 8){
+            if (password == passrepeat){
+                db.all('SELECT * FROM users', function(err, rows){
+                    if (benutzerExistiert(username, rows) != true){
+                        benutzerHinzufuegen(username, password);
+                        res.send("YEEEEE");
+                    }else{
+                        res.send("Benutzer existiert bereits!");
+                    }
+                }
+            );
+            }else{
+                res.send("Passwörter stimmen nicht überein!");
+            }        
+        }else{
+            res.send("Passwort zu kurz! (min. 8 Zeichen)");
+        }
+    }else{
+        res.send("Benutzername zu kurz! (min. 4 Zeichen)");
+    }
+});
+
+// Prüft ob der Nutzer existiert
+function benutzerExistiert(benutzername, rows){
+    for(var i = 0; i < rows.length; i++){
+        if (rows[i].username == benutzername){
+            return true;
+        }
+    }
+    return false;
+};
+
+// Fügt einen neuen Nutzer hinzu
+function benutzerHinzufuegen(usr, pass){
+    db.run(
+        `INSERT INTO users(name, pw) VALUES("${usr}", "${pass}")`
+    );
 }
