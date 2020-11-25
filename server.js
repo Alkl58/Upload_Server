@@ -18,6 +18,10 @@ app.use(fileUpload());
 // Initialisierung MD5 Hash Generator
 var md5 = require('md5');
 
+// Initialisierung SQLITE Datenbank
+const DATABASE = "user.db";
+const sqlite3 = require("sqlite3").verbose();
+const db = new sqlite3.Database(DATABASE);
 
 // ═════════════════ Server starten ══════════════════
 app.listen(80, function(){
@@ -50,3 +54,28 @@ app.post("/onupload", function(req, res){
     file.mv(__dirname + "/upload/" + tempmd5 + "_" + file.name);
 
 });
+
+// ═══════════════════ Login POST ════════════════════
+app.post("/login", function(req, res){
+    const username = req.body.username;
+    const password = req.body.password;
+
+    db.all("SELECT * FROM users", function(err, rows){
+        if (anmeldungErfolgreich(username, password, rows) == true){
+            res.send("Yee");
+        }else{
+            res.send("Ree");
+        }   
+    });
+});
+
+
+// Prüft ob Nutzername und Passwort stimmen
+function anmeldungErfolgreich(benutzername, passwort, rows){
+    for(var i = 0; i < rows.length; i++){
+        if (rows[i].name == benutzername && rows[i].pw == passwort){
+            return true;
+        }
+    }
+    return false;
+}
