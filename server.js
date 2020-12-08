@@ -23,6 +23,10 @@ const DATABASE = "user.db";
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database(DATABASE);
 
+// Initialisierung Cookie Parser
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 // ═════════════════ Server starten ══════════════════
 app.listen(80, function(){
     console.log("Server auf Port 80 gestartet");
@@ -46,12 +50,42 @@ app.get("/register", function(req, res){
 // ═════════════════════ POST ══════════════════════
 app.post("/onupload", function(req, res){
     const file = req.files.filename;
+    const usr = req.cookies.user;
+    const pw = req.cookies.pass;
 
-    // Berechnet den MD5 Hash von der Datei
-    const tempmd5 = md5(file);
+    db.all("SELECT * FROM users", function(err, rows){
+        if (anmeldungErfolgreich(usr, pw, rows) == true){
+            // Berechnet den MD5 Hash von der Datei
+            const tempmd5 = md5(file);
+            const usrmd5 = md5(usr);
 
-    // Speichert die Datei unter "upload" und benutzt den md5 hash
-    file.mv(__dirname + "/upload/" + tempmd5 + "_" + file.name);
+            var fs = require('fs');
+            // Erstellt den Unterordner wenn es nicht existiert
+            if (!fs.existsSync(__dirname + "/upload/" + usrmd5)){
+                fs.mkdirSync(__dirname + "/upload/" + usrmd5);
+            }
+
+            // Speichert die Datei unter "upload" und benutzt den md5 hash
+            file.mv(__dirname + "/upload/" + usrmd5 + "/" + tempmd5 + "_" + file.name);
+
+            // Ließt alle Hochgeladenen Dateien
+            var dateiarray = []
+            fs.readdir(__dirname + "/upload/" + usrmd5 + "/", (err, files) => {
+                files.forEach(file => {
+                    dateiarray.push(file);
+                });
+                res.render("uploads", {"uploads": dateiarray});
+            });
+
+            
+
+        }else{
+            // Redirect wenn nicht eingeloggt oder cookie falsch
+            res.redirect("/login");
+        }   
+    });
+
+
 
 });
 
@@ -62,9 +96,12 @@ app.post("/login", function(req, res){
 
     db.all("SELECT * FROM users", function(err, rows){
         if (anmeldungErfolgreich(username, password, rows) == true){
-            res.send("Yee");
+            const maxAge = 3600*1000; //eine Stunde
+            res.cookie('user', username, {'maxAge':maxAge});
+            res.cookie('pass', password, {'maxAge':maxAge});
+            res.redirect("/");
         }else{
-            res.send("Ree");
+            res.send("REEEEEEEEEEEEEEE");
         }   
     });
 });
