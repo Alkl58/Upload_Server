@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pfeil-Schäring</title>
+        <link rel="stylesheet" type="text/css" href="css/topnav.css">
+        <link rel="stylesheet" type="text/css" href="css/upload.css">
+    </head>
+    <body style="background-color:#161616;">
+        <div class="topnav">
+            <a href="/">Pfeil-Schäring</a>
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+            <a href="/register">Registrieren</a>
+            <a class="active" href="/uploads">Uploads</a>
+        </div> 
+        <table border="1">
+            <% for(var i = 0; i < uploads.length; i++) { %>
+                <tr>
+                    <td><%= uploads %></td>
+                </tr>
+            <% } %>
+        </table>
+    </body>
+</html>
