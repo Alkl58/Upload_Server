@@ -34,17 +34,51 @@ app.listen(80, function(){
 
 app.use(express.static(__dirname + '/public'));
 
+app.use(express.static(__dirname + '/upload'));
+
 // ══════════════════ MainPage GET ═══════════════════
 app.get("/", function(req, res){
     res.sendFile(__dirname + "/views/index.html");
 });
 // ════════════════════ Login GET ════════════════════
 app.get("/login", function(req, res){
-    res.render("login");
+    res.render("login", {"errorText": null});
 });
 // ══════════════════ Register GET ═══════════════════
 app.get("/register", function(req, res){
-    res.render("register");
+    res.render("register", {"errorText": null});
+});
+
+app.get("/uploads", function(req, res){
+    const usr = req.cookies.user;
+    const pw = req.cookies.pass;
+
+    db.all("SELECT * FROM users", function(err, rows){
+        if (anmeldungErfolgreich(usr, pw, rows) == true){
+            // Berechnet den MD5 Hash von der Datei
+            const usrmd5 = md5(usr);
+
+            var fs = require('fs');
+            // Erstellt den Unterordner wenn es nicht existiert
+            if (!fs.existsSync(__dirname + "/upload/" + usrmd5)){
+                fs.mkdirSync(__dirname + "/upload/" + usrmd5);
+            }
+
+            // Ließt alle Hochgeladenen Dateien
+            var dateiarray = []
+            fs.readdir(__dirname + "/upload/" + usrmd5 + "/", (err, files) => {
+                files.forEach(file => {
+                    // Fügt alle Elemente in Ordner zu Array zu
+                    dateiarray.push(usrmd5 + "/" + file);
+                });
+                res.render("uploads", {"uploads": dateiarray});
+            });
+        }else{
+            // Redirect wenn nicht eingeloggt oder cookie falsch
+            res.render("login", {"errorText": "Bitte einloggen!"});
+        }   
+    });
+
 });
 
 // ═════════════════════ POST ══════════════════════
@@ -72,16 +106,14 @@ app.post("/onupload", function(req, res){
             var dateiarray = []
             fs.readdir(__dirname + "/upload/" + usrmd5 + "/", (err, files) => {
                 files.forEach(file => {
-                    dateiarray.push(file);
+                    // Fügt alle Elemente in Ordner zu Array zu
+                    dateiarray.push(usrmd5 + "/" + file);
                 });
                 res.render("uploads", {"uploads": dateiarray});
             });
-
-            
-
         }else{
             // Redirect wenn nicht eingeloggt oder cookie falsch
-            res.redirect("/login");
+            res.render("login", {"errorText": "Bitte einloggen!"});
         }   
     });
 
@@ -101,7 +133,7 @@ app.post("/login", function(req, res){
             res.cookie('pass', password, {'maxAge':maxAge});
             res.redirect("/");
         }else{
-            res.send("REEEEEEEEEEEEEEE");
+            res.render("login", {"errorText": "Benutzername oder Passwort falsch!"});
         }   
     });
 });
@@ -128,21 +160,26 @@ app.post("/register", function(req,res){
             if (password == passrepeat){
                 db.all('SELECT * FROM users', function(err, rows){
                     if (benutzerExistiert(username, rows) != true){
+                        // Fügt den Benutzer zur Datenbank hinzu
                         benutzerHinzufuegen(username, password);
-                        res.send("YEEEEE");
+                        // Setzt die Cookies, damit der User direkt anfangen kann
+                        res.cookie('user', username, {'maxAge':maxAge});
+                        res.cookie('pass', password, {'maxAge':maxAge});
+                        // Redirect zur Main Page
+                        res.redirect("/");
                     }else{
                         res.send("Benutzer existiert bereits!");
                     }
                 }
             );
             }else{
-                res.send("Passwörter stimmen nicht überein!");
+                res.render("register", {"errorText": "Passwörter stimmen nicht überein!"});
             }        
         }else{
-            res.send("Passwort zu kurz! (min. 8 Zeichen)");
+            res.render("register", {"errorText": "Passwort zu kurz! (min. 8 Zeichen)"});
         }
     }else{
-        res.send("Benutzername zu kurz! (min. 4 Zeichen)");
+        res.render("register", {"errorText": "Benutzername zu kurz! (min. 4 Zeichen)"});
     }
 });
 
