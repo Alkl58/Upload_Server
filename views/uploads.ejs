@@ -16,7 +16,9 @@
         <table border="1">
             <% for(var i = 0; i < uploads.length; i++) { %>
                 <tr>
-                    <td><%= uploads %></td>
+                    <td>
+                        <a href="<%= uploads %>"><%= uploads %></a>
+                    </td>
                 </tr>
             <% } %>
         </table>
