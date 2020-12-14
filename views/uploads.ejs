@@ -18,10 +18,16 @@
                 <h1>Deine Uploads</h1>
             </div>
             <table border="1">
+                <p style="color:red"><%= errorText %></p>
                 <% for(var i = 0; i < uploads.length; i++) { %>
                     <tr>
                         <td>
-                            <a href="<%= uploads[i] %>"><%= uploads[i] %></a>
+                            <a href="<%= usr + uploads[i] %>"><%= uploads[i] %></a>
+                        </td>
+                        <td>
+                            <form action="/delete/<%=uploads[i]%>" method="POST">
+                                <button type="submit">Löschen</button>
+                            </form>
                         </td>
                     </tr>
                 <% } %>
