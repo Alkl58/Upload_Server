@@ -7,3 +7,14 @@
 - Express: ```npm install express --save```
 - Express Fileupload: ```npm install express-fileupload --save```
 - ejs: ```npm install ejs --save```
+
+## To-Do
+
+- [X] Login
+- [X] Registrieren
+- [X] Upload
+- [X] Download
+- [X] Cookies
+- [X] Upload löschbar
+- [ ] User verwaltung
+- [ ] Private Uploads
