@@ -67,11 +67,17 @@ app.get("/uploads", function(req, res){
             // Ließt alle Hochgeladenen Dateien
             var dateiarray = []
             fs.readdir(__dirname + "/upload/" + usrmd5 + "/", (err, files) => {
+                var uploadsCount = 0;
+                var errText = null;
                 files.forEach(file => {
                     // Fügt alle Elemente in Ordner zu Array zu
-                    dateiarray.push(usrmd5 + "/" + file);
+                    dateiarray.push(file);
+                    uploadsCount = 1;
                 });
-                res.render("uploads", {"uploads": dateiarray});
+                if (uploadsCount == 0){
+                    errText = "Keine Uploads!";
+                }
+                res.render("uploads", {"uploads": dateiarray, "usr": usrmd5 + "/", "errorText": errText});
             });
         }else{
             // Redirect wenn nicht eingeloggt oder cookie falsch
@@ -102,15 +108,7 @@ app.post("/onupload", function(req, res){
             // Speichert die Datei unter "upload" und benutzt den md5 hash
             file.mv(__dirname + "/upload/" + usrmd5 + "/" + tempmd5 + "_" + file.name);
 
-            // Ließt alle Hochgeladenen Dateien
-            var dateiarray = []
-            fs.readdir(__dirname + "/upload/" + usrmd5 + "/", (err, files) => {
-                files.forEach(file => {
-                    // Fügt alle Elemente in Ordner zu Array zu
-                    dateiarray.push(usrmd5 + "/" + file);
-                });
-                res.render("uploads", {"uploads": dateiarray});
-            });
+            res.redirect("/uploads");
         }else{
             // Redirect wenn nicht eingeloggt oder cookie falsch
             res.render("login", {"errorText": "Bitte einloggen!"});
@@ -148,6 +146,34 @@ function anmeldungErfolgreich(benutzername, passwort, rows){
     return false;
 }
 
+// ════════════════ Datei Löschen POST ════════════════
+app.post("/delete/:uploads", function(req, res){
+    const usr = req.cookies.user;
+    const pw = req.cookies.pass;
+
+    db.all("SELECT * FROM users", function(err, rows){
+        if (anmeldungErfolgreich(usr, pw, rows) == true){
+            // Berechnet den MD5 Hash von der Datei
+            const usrmd5 = md5(usr);
+            console.log(req.params.uploads);
+            var fs = require('fs');
+            // Löscht die Datei
+            try 
+            {
+                // Lösche Datei
+                fs.unlinkSync(__dirname + "/upload/" + usrmd5 + "/" + req.params.uploads)
+            } catch(err) {
+                console.error(err)
+            }
+
+            //
+            res.redirect("/uploads");
+        }else{
+            // Redirect wenn nicht eingeloggt oder cookie falsch
+            res.render("login", {"errorText": "Bitte einloggen!"});
+        }   
+    });
+});
 
 // ════════════════ Registrieren POST ═════════════════
 app.post("/register", function(req,res){
