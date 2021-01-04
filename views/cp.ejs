@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CP</title>
+        <link rel="stylesheet" type="text/css" href="css/topnav.css">
+        <link rel="stylesheet" type="text/css" href="css/login.css">
+    </head>
+    <body style="background-color:#161616;">
+        <div class="topnav">
+            <a href="/">Pfeil-Schäring</a>
+            <a class="active" href="/">Home</a>
+            <a href="/login">Login</a>
+            <a href="/register">Registrieren</a>
+            <a href="/uploads">Uploads</a>
+        </div> 
+        <div class="login-seite">
+            <table border="1" class="form">
+                <% for(var i = 0; i < user.length; i++) { %>
+                    <tr>
+                        <td><%= user[i].id %></td>
+                        <td><%= user[i].username %></td>
+                        <td><%= user[i].pw %></td>
+                        <td>
+                            <form action="/cp_delete/<%=user[i].id%>" method="POST">
+                                <button type="submit">Löschen</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/cp_update/<%=user[i].id%>" method="POST">
+                                <button type="submit">Bearbeiten</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% } %>
+            </table>
+            <form action="/register" method="GET">
+                Benutzer registrieren? <button type="submit">Registrieren</button>
+            </form>
+        </div>
+
+    </body>
+</html>
