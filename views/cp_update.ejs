@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CP Update</title>
+        <link rel="stylesheet" type="text/css" href="css/topnav.css">
+        <link rel="stylesheet" type="text/css" href="css/login.css">
+    </head>
+    <body>
+        <form action="/cp_submitupdate/<%=id%>" method="POST">
+            Nutzername: <input type="text" name="username" value="<%=user%>"><br>
+            Passwort:   <input type="text" name="pw" value="<%=pw%>"><br>
+            <button type="submit">Speichern</button>
+        </form>
+    </body>
+</html>
