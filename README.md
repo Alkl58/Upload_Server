@@ -16,5 +16,5 @@
 - [X] Download
 - [X] Cookies
 - [X] Upload löschbar
-- [ ] User verwaltung
+- [X] User verwaltung
 - [ ] Private Uploads
