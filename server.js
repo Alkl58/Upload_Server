@@ -40,6 +40,131 @@ app.use(express.static(__dirname + '/upload'));
 app.get("/", function(req, res){
     res.sendFile(__dirname + "/views/index.html");
 });
+
+// ═══════════════════════ CP ════════════════════════
+app.get("/cp", function(req, res){
+    const usr = req.cookies.user;
+    const pw = req.cookies.pass;
+
+    db.all("SELECT * FROM users", function(err, rows){
+        if (anmeldungErfolgreich(usr, pw, rows) == true)
+        {
+            if(usr == "admin")
+            {
+                db.all(
+                    'SELECT * FROM users',
+                    function(err, rows){
+                        res.render("cp", {"user": rows});
+                    }
+                );
+            }
+            else
+            {
+            // Redirect wenn nicht admin
+            res.render("login", {"errorText": "Nur Admins haben Zugriff auf diese Funktion!"});
+            }
+        }
+        else
+        {
+            // Redirect wenn nicht eingeloggt oder cookie falsch
+            res.render("login", {"errorText": "Bitte einloggen!"});
+        }   
+    });
+
+});
+
+// Benutzer löschen
+app.post("/cp_delete/:id", function(req, res){
+    const usr = req.cookies.user;
+    const pw = req.cookies.pass;
+
+    db.all("SELECT * FROM users", function(err, rows){
+        if (anmeldungErfolgreich(usr, pw, rows) == true)
+        {
+            if(usr == "admin")
+            {
+                db.run(`DELETE FROM users WHERE id=${req.params.id}`, function(err){
+                    res.redirect("/cp");
+                }
+            );
+            }
+            else
+            {
+                // Redirect wenn nicht admin
+                res.render("login", {"errorText": "Nur Admins haben Zugriff auf diese Funktion!"});
+            }
+        }
+        else
+        {
+            // Redirect wenn nicht eingeloggt oder cookie falsch
+            res.render("login", {"errorText": "Bitte einloggen!"});
+        }   
+    });
+});
+
+// Nutzer bearbeiten
+app.post("/cp_update/:id", function(req, res){
+    const usr = req.cookies.user;
+    const pw = req.cookies.pass;
+
+    db.all("SELECT * FROM users", function(err, rows){
+        if (anmeldungErfolgreich(usr, pw, rows) == true)
+        {
+            if(usr == "admin")
+            {
+                db.all(`SELECT * FROM users WHERE id = ${req.params.id}`, function(err, rows){
+                    res.render("cp_update", {"user": rows[0].name, "pw": rows[0].pw, "id": rows[0].id})
+                });
+            }
+            else
+            {
+                // Redirect wenn nicht admin
+                res.render("login", {"errorText": "Nur Admins haben Zugriff auf diese Funktion!"});
+            }
+        }
+        else
+        {
+            // Redirect wenn nicht eingeloggt oder cookie falsch
+            res.render("login", {"errorText": "Bitte einloggen!"});
+        }   
+    });
+});
+
+app.post("/cp_submitupdate/:id", function(req, res){
+    const usr = req.cookies.user;
+    const pw = req.cookies.pass;
+    const param_user = req.body.username;
+    const param_pw = req.body.pw;
+    const param_id = req.params.id;
+
+    db.all("SELECT * FROM users", function(err, rows){
+        if (anmeldungErfolgreich(usr, pw, rows) == true)
+        {
+            if(usr == "admin")
+            {
+                db.run(
+                    `UPDATE users SET name="${param_user}", pw="${param_pw}" WHERE id=${param_id}`,
+                    function(err){
+                        res.redirect("/cp");
+                    }
+                );
+            }
+            else
+            {
+                // Redirect wenn nicht admin
+                res.render("login", {"errorText": "Nur Admins haben Zugriff auf diese Funktion!"});
+            }
+        }
+        else
+        {
+            // Redirect wenn nicht eingeloggt oder cookie falsch
+            res.render("login", {"errorText": "Bitte einloggen!"});
+        }   
+    });
+
+
+});
+
 // ════════════════════ Login GET ════════════════════
 app.get("/login", function(req, res){
     res.render("login", {"errorText": null});
@@ -189,6 +314,7 @@ app.post("/register", function(req,res){
                         // Fügt den Benutzer zur Datenbank hinzu
                         benutzerHinzufuegen(username, password);
                         // Setzt die Cookies, damit der User direkt anfangen kann
+                        const maxAge = 3600*1000; //eine Stunde
                         res.cookie('user', username, {'maxAge':maxAge});
                         res.cookie('pass', password, {'maxAge':maxAge});
                         // Redirect zur Main Page
@@ -212,7 +338,7 @@ app.post("/register", function(req,res){
 // Prüft ob der Nutzer existiert
 function benutzerExistiert(benutzername, rows){
     for(var i = 0; i < rows.length; i++){
-        if (rows[i].username == benutzername){
+        if (rows[i].name == benutzername){
             return true;
         }
     }
