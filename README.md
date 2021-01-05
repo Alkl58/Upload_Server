@@ -6,6 +6,7 @@
 - Cookie-Parser: ```npm install cookie-parser --save```
 - Express: ```npm install express --save```
 - Express Fileupload: ```npm install express-fileupload --save```
+- Express Session ```npm install express-session --save```
 - ejs: ```npm install ejs --save```
 
 ## To-Do
@@ -17,4 +18,5 @@
 - [X] Cookies
 - [X] Upload löschbar
 - [X] User verwaltung
+- [X] User Session
 - [ ] Private Uploads
