@@ -3,6 +3,15 @@
 const express = require("express");
 const app = express();
 
+//Initialisierung express-sessions
+const session = require('express-session');
+app.use(session({
+    secret : 'Pfeil',
+    saveUninitialized : false,
+    resave : false
+}));
+
+
 // Initialisierung Body-Parser
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -165,18 +174,37 @@ app.post("/cp_submitupdate/:id", function(req, res){
 
 });
 
-// ════════════════════ Login GET ════════════════════
-app.get("/login", function(req, res){
-    res.render("login", {"errorText": null});
+// ════════════════════ Login GET ════════════════════ 
+app.get("/login", function(req, res){ 
+    if (!req.session.username){
+        res.render("login",{ "message": null,"errorText": null});
+    }
+    else{
+        res.render("login",{'message': "Willkommen " + req.session.username,"errorText": null});
+    }
+    //res.render("login", {"errorText": null});
 });
 // ══════════════════ Register GET ═══════════════════
 app.get("/register", function(req, res){
-    res.render("register", {"errorText": null});
-});
+    if (!req.session.username){
+        res.render("register",{ "message": null,"errorText": null});
+    }
+    else{
+        res.render("register",{'message': "Willkommen " + req.session.username,"errorText": null});
+    }
+    //res.render("register", {"errorText": null});
+}); //
 
 app.get("/uploads", function(req, res){
     const usr = req.cookies.user;
     const pw = req.cookies.pass;
+
+    if (!req.session.username){
+        message = null;
+    }
+    else{
+        message =  req.session.username;
+    }
 
     db.all("SELECT * FROM users", function(err, rows){
         if (anmeldungErfolgreich(usr, pw, rows) == true){
@@ -248,10 +276,13 @@ app.post("/onupload", function(req, res){
 app.post("/login", function(req, res){
     const username = req.body.username;
     const password = req.body.password;
+    const param_sessionValue = req.body.username; //
+    
 
     db.all("SELECT * FROM users", function(err, rows){
         if (anmeldungErfolgreich(username, password, rows) == true){
             const maxAge = 3600*1000; //eine Stunde
+            req.session.username = param_sessionValue; //
             res.cookie('user', username, {'maxAge':maxAge});
             res.cookie('pass', password, {'maxAge':maxAge});
             res.redirect("/");
@@ -351,3 +382,16 @@ function benutzerHinzufuegen(usr, pass){
         `INSERT INTO users(name, pw) VALUES("${usr}", "${pass}")`
     );
 }
+
+
+
+
+
+// ============= Session Variable Loeschen (LOGOUT) ====================
+app.get("/sessionLoeschen", function(req,res){
+    req.session.destroy(); //zerstoert die Session Variable
+    res.redirect('/login');
+    
+})
+
+
