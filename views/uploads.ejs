@@ -12,10 +12,13 @@
             <a href="/login">Login</a>
             <a href="/register">Registrieren</a>
             <a class="active" href="/uploads">Uploads</a>
+            <a href="/sessionLoeschen"> Logout</a>
+            <h1 style="color:rgba(255, 255, 255, 0.616)"> <%= message%></h1>
         </div> 
+        
         <div class="centeruploads">
             <div class="title">
-                <h1>Deine Uploads</h1>
+                <h1><%= message %> Uploads</h1>
             </div>
             <table border="1">
                 <p style="color:red"><%= errorText %></p>
