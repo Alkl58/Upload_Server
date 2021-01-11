@@ -37,7 +37,7 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 // ═════════════════ Server starten ══════════════════
-app.listen(80, function(){
+app.listen(8080, function(){
     console.log("Server auf Port 80 gestartet");
 });
 
@@ -47,7 +47,11 @@ app.use(express.static(__dirname + '/upload'));
 
 // ══════════════════ MainPage GET ═══════════════════
 app.get("/", function(req, res){
-    res.sendFile(__dirname + "/views/index.html");
+    if (!req.session.username){
+        res.render("index", {"message": "Bitte einloggen!", "UserLoginLogout": "Login", "UserLoginLogoutHref": "/login"});
+    }else{
+        res.render("index", {"message":  "Willkommen " + req.session.username, "UserLoginLogout": "Logout", "UserLoginLogoutHref": "/sessionLoeschen"});
+    }
 });
 
 // ═══════════════════════ CP ════════════════════════
@@ -70,13 +74,13 @@ app.get("/cp", function(req, res){
             else
             {
             // Redirect wenn nicht admin
-            res.render("login", {"errorText": "Nur Admins haben Zugriff auf diese Funktion!"});
+            res.render("login",{ "message": "Einloggen","errorText": "Nur Admins haben Zugriff auf diese Funktion!", "UserLoginLogout": "Login", "UserLoginLogoutHref": "/login"});
             }
         }
         else
         {
             // Redirect wenn nicht eingeloggt oder cookie falsch
-            res.render("login", {"errorText": "Bitte einloggen!"});
+            res.render("login",{ "message": "Einloggen","errorText": "Bitte einloggen!", "UserLoginLogout": "Login", "UserLoginLogoutHref": "/login"});
         }   
     });
 
@@ -128,13 +132,13 @@ app.post("/cp_update/:id", function(req, res){
             else
             {
                 // Redirect wenn nicht admin
-                res.render("login", {"errorText": "Nur Admins haben Zugriff auf diese Funktion!"});
+                res.render("login",{ "message": "Einloggen","errorText": "Nur Admins haben Zugfriff auf diese Funktion!", "UserLoginLogout": "Login", "UserLoginLogoutHref": "/login"});
             }
         }
         else
         {
             // Redirect wenn nicht eingeloggt oder cookie falsch
-            res.render("login", {"errorText": "Bitte einloggen!"});
+            res.render("login",{ "message": "Einloggen","errorText": null, "UserLoginLogout": "Login", "UserLoginLogoutHref": "/login"});
         }   
     });
 });
@@ -177,23 +181,22 @@ app.post("/cp_submitupdate/:id", function(req, res){
 // ════════════════════ Login GET ════════════════════ 
 app.get("/login", function(req, res){ 
     if (!req.session.username){
-        res.render("login",{ "message": null,"errorText": null});
+        res.render("login",{ "message": "Einloggen","errorText": null, "UserLoginLogout": "Login", "UserLoginLogoutHref": "/login"});
     }
     else{
-        res.render("login",{'message': "Willkommen " + req.session.username,"errorText": null});
+        res.render("login",{'message': "Willkommen " + req.session.username,"errorText": null, "UserLoginLogout": "Logout", "UserLoginLogoutHref": "/sessionLoeschen"});
     }
     //res.render("login", {"errorText": null});
 });
 // ══════════════════ Register GET ═══════════════════
 app.get("/register", function(req, res){
     if (!req.session.username){
-        res.render("register",{ "message": null,"errorText": null});
+        res.render("register",{ "message": "Registrieren","errorText": null, "UserLoginLogout": "Login", "UserLoginLogoutHref": "/login"});
     }
     else{
-        res.render("register",{'message': "Willkommen " + req.session.username,"errorText": null});
+        res.render("register",{'message': "Willkommen " + req.session.username,"errorText": null, "UserLoginLogout": "Logout", "UserLoginLogoutHref": "/sessionLoeschen"});
     }
-    //res.render("register", {"errorText": null});
-}); //
+}); 
 
 app.get("/uploads", function(req, res){
     const usr = req.cookies.user;
@@ -230,11 +233,11 @@ app.get("/uploads", function(req, res){
                 if (uploadsCount == 0){
                     errText = "Keine Uploads!";
                 }
-                res.render("uploads", {"uploads": dateiarray, "usr": usrmd5 + "/", "errorText": errText});
+                res.render("uploads", {"uploads": dateiarray, "usr": usrmd5 + "/", "errorText": errText, "UserLoginLogout": "Logout", "UserLoginLogoutHref": "/sessionLoeschen"});
             });
         }else{
             // Redirect wenn nicht eingeloggt oder cookie falsch
-            res.render("login", {"errorText": "Bitte einloggen!"});
+            res.render("login",{ "message": "Einloggen","errorText": null, "UserLoginLogout": "Login", "UserLoginLogoutHref": "/login"});
         }   
     });
 
@@ -242,34 +245,38 @@ app.get("/uploads", function(req, res){
 
 // ═════════════════════ POST ══════════════════════
 app.post("/onupload", function(req, res){
-    const file = req.files.filename;
-    const usr = req.cookies.user;
-    const pw = req.cookies.pass;
-
-    db.all("SELECT * FROM users", function(err, rows){
-        if (anmeldungErfolgreich(usr, pw, rows) == true){
-            // Berechnet den MD5 Hash von der Datei
-            const tempmd5 = md5(file);
-            const usrmd5 = md5(usr);
-
-            var fs = require('fs');
-            // Erstellt den Unterordner wenn es nicht existiert
-            if (!fs.existsSync(__dirname + "/upload/" + usrmd5)){
-                fs.mkdirSync(__dirname + "/upload/" + usrmd5);
-            }
-
-            // Speichert die Datei unter "upload" und benutzt den md5 hash
-            file.mv(__dirname + "/upload/" + usrmd5 + "/" + tempmd5 + "_" + file.name);
-
-            res.redirect("/uploads");
-        }else{
-            // Redirect wenn nicht eingeloggt oder cookie falsch
-            res.render("login", {"errorText": "Bitte einloggen!"});
-        }   
-    });
 
 
+    if (!req.files){
+        res.redirect("/");
 
+    }else{
+
+        const file = req.files.filename;
+        const usr = req.cookies.user;
+        const pw = req.cookies.pass;
+        db.all("SELECT * FROM users", function(err, rows){
+            if (anmeldungErfolgreich(usr, pw, rows) == true){
+                // Berechnet den MD5 Hash von der Datei
+                const tempmd5 = md5(file);
+                const usrmd5 = md5(usr);
+    
+                var fs = require('fs');
+                // Erstellt den Unterordner wenn es nicht existiert
+                if (!fs.existsSync(__dirname + "/upload/" + usrmd5)){
+                    fs.mkdirSync(__dirname + "/upload/" + usrmd5);
+                }
+    
+                // Speichert die Datei unter "upload" und benutzt den md5 hash
+                file.mv(__dirname + "/upload/" + usrmd5 + "/" + tempmd5 + "_" + file.name);
+    
+                res.redirect("/uploads");
+            }else{
+                // Redirect wenn nicht eingeloggt oder cookie falsch
+                res.render("login",{ "message": "Einloggen","errorText": null, "UserLoginLogout": "Login", "UserLoginLogoutHref": "/login"});
+            }   
+        });
+    }
 });
 
 // ═══════════════════ Login POST ════════════════════
@@ -287,7 +294,7 @@ app.post("/login", function(req, res){
             res.cookie('pass', password, {'maxAge':maxAge});
             res.redirect("/");
         }else{
-            res.render("login", {"errorText": "Benutzername oder Passwort falsch!"});
+            res.render("login",{ "message": "Einloggen","errorText": "Benutzername oder Passwort falsch!", "UserLoginLogout": "Login", "UserLoginLogoutHref": "/login"});
         }   
     });
 });
@@ -383,15 +390,11 @@ function benutzerHinzufuegen(usr, pass){
     );
 }
 
-
-
-
-
 // ============= Session Variable Loeschen (LOGOUT) ====================
 app.get("/sessionLoeschen", function(req,res){
-    req.session.destroy(); //zerstoert die Session Variable
+    res.clearCookie("user"); //zerstoert die Session Variable
+    res.clearCookie("pass");
+    res.clearCookie("connect.sid");
     res.redirect('/login');
     
 })
-
-
