@@ -10,13 +10,13 @@
     <div class="topnav">
         <a href="/">Pfeil-Schäring</a>
         <a href="/">Home</a>
-        <a href="/login">Login</a>
+        <a href="/uploads">Uploads</a>
         <a class="active" href="/register">Registrieren</a>
-        
-      </div> 
-      <h1 style="color:rgba(255, 255, 255, 0.616)"> <%= message%></h1>
+        <a href="<%= UserLoginLogoutHref%>"> <%= UserLoginLogout%></a>
+    </div> 
     <div class="login-seite">
       <div class="form">
+        <h1 style="color:rgba(255, 255, 255, 0.616)"> <%= message%></h1>
         <form class="login-form" action="/register" method="POST">
           <input type="text" placeholder="Nutzername" name="username"/>
           <input type="password" placeholder="Passwort" name="password"/>
