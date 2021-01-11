@@ -17,9 +17,9 @@
             <table border="1" class="form">
                 <% for(var i = 0; i < user.length; i++) { %>
                     <tr>
-                        <td><%= user[i].id %></td>
-                        <td><%= user[i].username %></td>
-                        <td><%= user[i].pw %></td>
+                        <td style="color:white"><%= user[i].id %></td>
+                        <td style="color:white"><%= user[i].name %></td>
+                        <td style="color:white"><%= user[i].pw %></td>
                         <td>
                             <form action="/cp_delete/<%=user[i].id%>" method="POST">
                                 <button type="submit">Löschen</button>
@@ -33,9 +33,7 @@
                     </tr>
                 <% } %>
             </table>
-            <form action="/register" method="GET">
-                Benutzer registrieren? <button type="submit">Registrieren</button>
-            </form>
+
         </div>
 
     </body>
