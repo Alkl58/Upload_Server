@@ -9,13 +9,10 @@
         <div class="topnav">
             <a href="/">Pfeil-Schäring</a>
             <a href="/">Home</a>
-            <a href="/login">Login</a>
-            <a href="/register">Registrieren</a>
             <a class="active" href="/uploads">Uploads</a>
-            <a href="/sessionLoeschen"> Logout</a>
-            <h1 style="color:rgba(255, 255, 255, 0.616)"> <%= message%></h1>
+            <a href="/register">Registrieren</a>
+            <a href="<%= UserLoginLogoutHref%>"> <%= UserLoginLogout%></a>
         </div> 
-        
         <div class="centeruploads">
             <div class="title">
                 <h1><%= message %> Uploads</h1>
@@ -25,7 +22,8 @@
                 <% for(var i = 0; i < uploads.length; i++) { %>
                     <tr>
                         <td>
-                            <a href="<%= usr + uploads[i] %>"><%= uploads[i] %></a>
+                            <% let myString = uploads[i]%>
+                            <a href="<%= usr + uploads[i] %>"><%= myString.substring(33, myString.length) %></a>
                         </td>
                         <td>
                             <form action="/delete/<%=uploads[i]%>" method="POST">
