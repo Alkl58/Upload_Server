@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pfeil-Schäring</title>
+        <link rel="stylesheet" type="text/css" href="css/topnav.css">
+        <link rel="stylesheet" type="text/css" href="css/upload.css">
+    </head>
+    <body style="background-color:#161616;">
+        <div class="topnav">
+            <a href="/">Pfeil-Schäring</a>
+            <a class="active" href="/">Home</a>
+            <a href="/uploads">Uploads</a>
+            <a href="/register">Registrieren</a>
+            <a href="<%= UserLoginLogoutHref%>"> <%= UserLoginLogout%></a>
+            <h1 style="color:rgba(255, 255, 255, 0.616)"> <%= message%></h1>
+        </div> 
+            <div class="center">
+                <div class="title">
+                    <h1>Drag & Drop</h1>
+		        </div>
+                <form action="onupload" method="POST" enctype="multipart/form-data">
+					<div class="dropzone">
+						<img src="/img/upload.svg" class="upload-icon"/>
+						<input type="file" name="filename" class="upload-input"/>
+		            </div>
+                     <button class="btn" type="submit"><span>Hochladen</span></button>
+                </form>
+            </div> 
+    </body>
+</html>
