@@ -2,14 +2,25 @@
 <html>
     <head>
         <title>CP Update</title>
-        <link rel="stylesheet" type="text/css" href="css/topnav.css">
-        <link rel="stylesheet" type="text/css" href="css/login.css">
+        <link rel="stylesheet" type="text/css" href="../css/topnav.css">
+        <link rel="stylesheet" type="text/css" href="../css/login.css">
     </head>
-    <body>
-        <form action="/cp_submitupdate/<%=id%>" method="POST">
-            Nutzername: <input type="text" name="username" value="<%=user%>"><br>
-            Passwort:   <input type="text" name="pw" value="<%=pw%>"><br>
-            <button type="submit">Speichern</button>
-        </form>
+    <body style="background-color:#161616;">
+        <div class="topnav">
+            <a href="/">Pfeil-Schäring</a>
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+            <a href="/register">Registrieren</a>
+            <a href="/uploads">Uploads</a>
+        </div> 
+        <div class="login-seite">
+            <form action="/cp_submitupdate/<%=id%>" method="POST" class="form">
+                <p style="color:white">Nutzername:</p>
+                <input type="text" name="username" value="<%=user%>"><br>
+                <p style="color:white">Passwort:</p>
+                <input type="text" name="pw" value="<%=pw%>"><br>
+                <button type="submit">Speichern</button>
+            </form>
+        </div>
     </body>
 </html>
